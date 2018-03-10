@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple PDF Viewer</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Karma" rel="stylesheet">
+
+   <style>
+      body {
+        font-family: 'Karma', serif;
+        max-width: 800px;
+      }
+
+      .space-items {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .border-box {
+        padding: 15px;
+        margin: 20px 0;
+        border: 1px solid black;
+      }
+
+      .border-box--green {
+        background-color: #B0BFB3;
+        border-color: #28502E;
+      }
+
+      .border-box--blue {
+        background-color: #DDF3FF;
+        border-color: #215774;
+      }
+
+      .divider {
+        margin-top: 10px;
+        border-bottom: 1px solid black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Simple PDF Viewer</h1>
+
+    <div class="border-box border-box--green space-items">
+      <h3>Select a PDF to get started.</h3>
+      <input id="fileInput" type="file" accept=".pdf">
+    </div>
+
+    <p>
+      Once you've loaded your PDF, use <a href="https://chrome.google.com/webstore/detail/spectrum/ofclemegkcmilinpcimpjkfhjfgmhieb?hl=en">Spectrum</a> Chrome Extension
+      (or your tool of preference) to simulate different types of color vision deficiency
+      as you view your file.
+    </p>
+
+    <p>A few resources you may find useful:</p>
+
+    <ul>
+      <li><a href="http://wearecolorblind.com/">We are Colorblind.com</a>, dedicated to making the web a better place for the color blind</li>
+      <li><a href="https://www.smashingmagazine.com/2016/06/improving-color-accessibility-for-color-blind-users/">Improving The Color Accessibility For Color-Blind Users</a>, article in Smashing Magazine</li>
+      <li><a href="https://chrome.google.com/webstore/detail/spectrum/ofclemegkcmilinpcimpjkfhjfgmhieb?hl=en">Spectrum</a>, a free color vision deficiency simulator for Chrome</li>
+      <li><a href="http://colororacle.org/">Color Oracle</a>, a free color blindness simulator for Windows, Mac, and Linux</li>
+    </ul>
+
+    <div id="container"></div>
+
+    <h3 class="divider">FAQ</h3>
+
+    <p><strong>Why does this page even exist?</strong></p>
+
+    <p>
+      Most color vision deficiency simulators that are browser extensions don't properly
+      function when viewing a PDF directly in the browser. I needed a quick way to load
+      all my slides from a presentation to verify they would be easily readable for
+      anyone in the audience with a color vision deficiency, and this was the first solution
+      I came up with.
+    </p>
+
+    <p><strong>Does this upload my PDF anywhere?</strong></p>
+
+    <p>
+      No, your files stay on your own computer! This site just displays them for
+      you in the browser, in a way that's easy to use with browser extensions that simulate
+      color vision deficiency.
+    </p>
+
+    <p><strong>Who made this site?</strong></p>
+
+    <p>
+      That would be me — <a href="http://mariechatfield.com">Marie Chatfield</a>.
+      I use the <a href="https://mozilla.github.io/pdf.js/">PDF.js</a> platform, created by Mozilla,
+      to render the PDFs.
+    </p>
+
+    <!-- Load the PDF.js source code. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.428/pdf.min.js"></script>
+
+    <script>
+      // Scale of the PDFs to render
+      const SCALE = 0.75;
+
+      // Loaded via <script> tag, create shortcut to access PDF.js exports.
+      const pdfjs = window['pdfjs-dist/build/pdf'];
+
+      // The workerSrc property shall be specified.
+      pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.428/pdf.worker.min.js';
+
+      // Load PDF whenever the user selects a new file
+      const fileInput = document.getElementById('fileInput');
+      fileInput.addEventListener('change', function() {
+        const files = fileInput.files;
+        const file = files && files[0];
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = event => loadPDF(file.name, event.target.result);
+          reader.readAsArrayBuffer(file);
+        }
+      });
+
+      /**
+       * Load PDF and render in DOM.
+       * @param  {String} name        Name of file to display.
+       * @param  {TypedArray} source  PDF contents represented as an ArrayBuffer.
+       */
+      function loadPDF(name, source) {
+        pdfjs.getDocument(source).then(function(pdfDoc) {
+          const parentNode = document.getElementById('container');
+
+          // Clear existing container
+          parentNode.innerHTML = '';
+
+          // Add PDF information to container (title and number of pages)
+          const information = document.createElement('div');
+          information.className = 'border-box border-box--blue space-items';
+
+          const title = document.createElement('h2');
+          title.textContent = name;
+
+          const pageCount = document.createElement('p');
+          pageCount.textContent = `${pdfDoc.numPages} Pages`;
+
+          information.appendChild(title);
+          information.appendChild(pageCount);
+          parentNode.appendChild(information);
+
+          // Add container for all pages of PDF
+          const pagesContainer = document.createElement('div');
+          pagesContainer.className = 'pages-container';
+
+          parentNode.appendChild(pagesContainer);
+
+          // Load each page and add to the container
+          for (var i = 1; i <= pdfDoc.numPages; i++) {
+            loadPageAndRender(pdfDoc, i, pagesContainer);
+          }
+        });
+      }
+
+      /**
+       * Load a page from a PDF and add it to the given DOM node.
+       * @param  {Object} pdfDoc         Loaded PDF document from PDF.js
+       * @param  {Number} pageNum        Page number to load (starts at 1, not 0)
+       * @param  {Node} pagesContainer   DOM node that the loaded PDF should be added to.
+       */
+      function loadPageAndRender(pdfDoc, pageNum, pagesContainer) {
+        pdfDoc.getPage(pageNum).then(function(page) {
+          const pageNode = renderPageIntoNode(page, pageNum);
+          pagesContainer.appendChild(pageNode);
+        });
+      }
+
+      /**
+       * Render page from a PDF into a canvas and return a DOM node with its page number.
+       * @param  {Object} page    Page that has been loaded from a PDF.js PDFDoc.
+       * @param  {Number} pageNum The number that describes the given page, used for a title.
+       * @return {Node}           DOM node with the PDF rendered in a canvas, plus a title.
+       */
+      function renderPageIntoNode(page, pageNum) {
+        const viewport = page.getViewport(SCALE);
+
+        const pageNode = document.createElement('div');
+
+        const title = document.createElement('h3');
+        title.textContent = `Page ${pageNum}`;
+        title.className = 'divider';
+
+        const canvas = document.createElement('canvas');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        pageNode.appendChild(title);
+        pageNode.appendChild(canvas);
+
+        const canvasContext = canvas.getContext('2d');
+
+        // Render PDF page into canvas context, asynchronously
+        page.render({
+          canvasContext,
+          viewport
+        });
+
+        return pageNode;
+      }
+    </script>
+  </body>
+</html>
