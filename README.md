@@ -2,6 +2,8 @@
 
 #### View PDFs in the browser to easily check against color vision deficiency simulators.
 
+See it live at [mariechatfield.com/simple-pdf-viewer](http://mariechatfield.com/simple-pdf-viewer).
+
 Most color vision deficiency simulators that are browser extensions don't properly function when viewing a PDF directly in the browser.
 
 I needed a quick way to load all my slides from a presentation to verify they would be easily readable for anyone in the audience with a color vision deficiency, and this was the first solution I came up with.
