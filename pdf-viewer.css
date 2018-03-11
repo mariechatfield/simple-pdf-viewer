@@ -1,0 +1,56 @@
+body {
+  font-family: 'Karma', serif;
+}
+
+/* Utility Classes */
+
+.border-pox, p {
+  max-width: 800px;
+}
+
+.space-items {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.border-box {
+  padding: 15px;
+  margin: 20px 0;
+  border: 1px solid black;
+}
+
+.border-box--green {
+  background-color: #B0BFB3;
+  border-color: #28502E;
+}
+
+.border-box--blue {
+  background-color: #DDF3FF;
+  border-color: #215774;
+}
+
+.divider {
+  margin-top: 10px;
+  border-bottom: 1px solid black;
+}
+
+/* Styling for PDF pages */
+
+.pdf__information h3 {
+  margin: 0;
+}
+
+.pdf__buttons {
+  margin: 10px;
+}
+
+.pdf-page {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.pdf-page__filter__description {
+  margin-left: 15px;
+}

@@ -4,40 +4,8 @@
     <title>Simple PDF Viewer</title>
 
     <link href="https://fonts.googleapis.com/css?family=Karma" rel="stylesheet">
-
-   <style>
-      body {
-        font-family: 'Karma', serif;
-        max-width: 800px;
-      }
-
-      .space-items {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .border-box {
-        padding: 15px;
-        margin: 20px 0;
-        border: 1px solid black;
-      }
-
-      .border-box--green {
-        background-color: #B0BFB3;
-        border-color: #28502E;
-      }
-
-      .border-box--blue {
-        background-color: #DDF3FF;
-        border-color: #215774;
-      }
-
-      .divider {
-        margin-top: 10px;
-        border-bottom: 1px solid black;
-      }
-    </style>
+    <link href="pdf-viewer.css" rel="stylesheet">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
   </head>
 
   <body>
@@ -48,40 +16,28 @@
       <input id="fileInput" type="file" accept=".pdf">
     </div>
 
-    <p>
-      Once you've loaded your PDF, use <a href="https://chrome.google.com/webstore/detail/spectrum/ofclemegkcmilinpcimpjkfhjfgmhieb?hl=en">Spectrum</a> Chrome Extension
-      (or your tool of preference) to simulate different types of color vision deficiency
-      as you view your file.
-    </p>
+    <!-- Where PDF content will be rendered. -->
+    <div id="container"></div>
 
-    <p>A few resources you may find useful:</p>
+    <h3 class="divider">Other Resources</h3>
 
     <ul>
+      <li><a href="http://www.color-blindness.com/">Colblinder</a>, an educational site about color-blindness and color vision deficiency</li>
       <li><a href="http://wearecolorblind.com/">We are Colorblind.com</a>, dedicated to making the web a better place for the color blind</li>
+      <li><a href="http://www.colourblindawareness.org/">Colour Blind Awareness</a>, U.K. based community interest organization</li>
+      <li><a href="https://accessibility.18f.gov/index.html">18F Accessibility Guide</a>, resources and tools to help develop accessible products</li>
       <li><a href="https://www.smashingmagazine.com/2016/06/improving-color-accessibility-for-color-blind-users/">Improving The Color Accessibility For Color-Blind Users</a>, article in Smashing Magazine</li>
       <li><a href="https://chrome.google.com/webstore/detail/spectrum/ofclemegkcmilinpcimpjkfhjfgmhieb?hl=en">Spectrum</a>, a free color vision deficiency simulator for Chrome</li>
       <li><a href="http://colororacle.org/">Color Oracle</a>, a free color blindness simulator for Windows, Mac, and Linux</li>
     </ul>
 
-    <div id="container"></div>
-
     <h3 class="divider">FAQ</h3>
-
-    <p><strong>Why does this page even exist?</strong></p>
-
-    <p>
-      Most color vision deficiency simulators that are browser extensions don't properly
-      function when viewing a PDF directly in the browser. I needed a quick way to load
-      all my slides from a presentation to verify they would be easily readable for
-      anyone in the audience with a color vision deficiency, and this was the first solution
-      I came up with.
-    </p>
 
     <p><strong>Does this upload my PDF anywhere?</strong></p>
 
     <p>
       No, your files stay on your own computer! This site just displays them for
-      you in the browser, in a way that's easy to use with browser extensions that simulate
+      you in the browser, and applies a color mask to each page to simulate different kinds of
       color vision deficiency.
     </p>
 
@@ -89,120 +45,81 @@
 
     <p>
       That would be me — <a href="http://mariechatfield.com">Marie Chatfield</a>.
-      I use the <a href="https://mozilla.github.io/pdf.js/">PDF.js</a> platform, created by Mozilla,
-      to render the PDFs. View the project source and contribute on <a href="https://github.com/mariechatfield/simple-pdf-viewer">GitHub</a>.
+      This project was built using the <a href="https://mozilla.github.io/pdf.js/">PDF.js</a>
+      platform (created by Mozilla) and the color blind SVG filters found in the
+      <a href="https://github.com/Altreus/colourblind">colourblind</a> bookmarklet
+      (created by <a href="https://github.com/Altreus">Alastair Douglas</a>).
+      View the source code of this project and contribute on <a href="https://github.com/mariechatfield/simple-pdf-viewer">GitHub</a>.
     </p>
+
+    <!--
+    Define SVG filters for each variant of color vision deficiency.
+    Source: https://raw.githubusercontent.com/Altreus/colourblind/master/colourblind.svg
+    -->
+    <svg id="colorblind-filters" style="display: none">
+        <defs>
+            <filter id="protanopia">
+                <feColorMatrix
+                    type="matrix"
+                    values="0.567,0.433,0,0,0  0.558,0.442,0,0,0  0 0.242,0.758,0,0  0,0,0,1,0"
+                    in="SourceGraphic"
+                />
+            </filter>
+            <filter id="protanomaly">
+                <feColorMatrix
+                    type="matrix"
+                    values="0.817,0.183,0,0,0  0.333,0.667,0,0,0  0,0.125,0.875,0,0  0,0,0,1,0"
+                    in="SourceGraphic"
+                />
+            </filter>
+            <filter id="deuteranopia">
+                <feColorMatrix
+                    type="matrix"
+                    values="0.625,0.375,0,0,0  0.7,0.3,0,0,0  0,0.3,0.7,0,0  0,0,0,1,0"
+                    in="SourceGraphic"
+                />
+            </filter>
+            <filter id="deuteranomaly">
+                <feColorMatrix
+                    type="matrix"
+                    values="0.8,0.2,0,0,0  0.258,0.742,0,0,0  0,0.142,0.858,0,0  0,0,0,1,0"
+                    in="SourceGraphic"
+                />
+            </filter>
+            <filter id="tritanopia">
+                <feColorMatrix
+                    type="matrix"
+                    values="0.95,0.05,0,0,0  0,0.433,0.567,0,0  0,0.475,0.525,0,0  0,0,0,1,0"
+                    in="SourceGraphic"
+                />
+            </filter>
+            <filter id="tritanomaly">
+                <feColorMatrix
+                    type="matrix"
+                    values="0.967,0.033,0,0,0  0,0.733,0.267,0,0  0,0.183,0.817,0,0  0,0,0,1,0"
+                    in="SourceGraphic"
+                />
+            </filter>
+            <filter id="achromatopsia">
+                <feColorMatrix
+                    type="matrix"
+                    values="0.299,0.587,0.114,0,0  0.299,0.587,0.114,0,0  0.299,0.587,0.114,0,0  0,0,0,1,0"
+                    in="SourceGraphic"
+                />
+            </filter>
+            <filter id="achromatomaly">
+                <feColorMatrix
+                    type="matrix"
+                    values="0.618,0.320,0.062,0,0  0.163,0.775,0.062,0,0  0.163,0.320,0.516,0,0  0,0,0,1,0"
+                    in="SourceGraphic"
+                />
+            </filter>
+        </defs>
+    </svg>
 
     <!-- Load the PDF.js source code. -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.428/pdf.min.js"></script>
-
-    <script>
-      // Scale of the PDFs to render
-      const SCALE = 0.75;
-
-      // Loaded via <script> tag, create shortcut to access PDF.js exports.
-      const pdfjs = window['pdfjs-dist/build/pdf'];
-
-      // The workerSrc property shall be specified.
-      pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.428/pdf.worker.min.js';
-
-      // Load PDF whenever the user selects a new file
-      const fileInput = document.getElementById('fileInput');
-      fileInput.addEventListener('change', function() {
-        const files = fileInput.files;
-        const file = files && files[0];
-
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = event => loadPDF(file.name, event.target.result);
-          reader.readAsArrayBuffer(file);
-        }
-      });
-
-      /**
-       * Load PDF and render in DOM.
-       * @param  {String} name        Name of file to display.
-       * @param  {TypedArray} source  PDF contents represented as an ArrayBuffer.
-       */
-      function loadPDF(name, source) {
-        pdfjs.getDocument(source).then(function(pdfDoc) {
-          const parentNode = document.getElementById('container');
-
-          // Clear existing container
-          parentNode.innerHTML = '';
-
-          // Add PDF information to container (title and number of pages)
-          const information = document.createElement('div');
-          information.className = 'border-box border-box--blue space-items';
-
-          const title = document.createElement('h2');
-          title.textContent = name;
-
-          const pageCount = document.createElement('p');
-          pageCount.textContent = `${pdfDoc.numPages} Pages`;
-
-          information.appendChild(title);
-          information.appendChild(pageCount);
-          parentNode.appendChild(information);
-
-          // Add container for all pages of PDF
-          const pagesContainer = document.createElement('div');
-          pagesContainer.className = 'pages-container';
-
-          parentNode.appendChild(pagesContainer);
-
-          // Load each page and add to the container
-          for (var i = 1; i <= pdfDoc.numPages; i++) {
-            loadPageAndRender(pdfDoc, i, pagesContainer);
-          }
-        });
-      }
-
-      /**
-       * Load a page from a PDF and add it to the given DOM node.
-       * @param  {Object} pdfDoc         Loaded PDF document from PDF.js
-       * @param  {Number} pageNum        Page number to load (starts at 1, not 0)
-       * @param  {Node} pagesContainer   DOM node that the loaded PDF should be added to.
-       */
-      function loadPageAndRender(pdfDoc, pageNum, pagesContainer) {
-        pdfDoc.getPage(pageNum).then(function(page) {
-          const pageNode = renderPageIntoNode(page, pageNum);
-          pagesContainer.appendChild(pageNode);
-        });
-      }
-
-      /**
-       * Render page from a PDF into a canvas and return a DOM node with its page number.
-       * @param  {Object} page    Page that has been loaded from a PDF.js PDFDoc.
-       * @param  {Number} pageNum The number that describes the given page, used for a title.
-       * @return {Node}           DOM node with the PDF rendered in a canvas, plus a title.
-       */
-      function renderPageIntoNode(page, pageNum) {
-        const viewport = page.getViewport(SCALE);
-
-        const pageNode = document.createElement('div');
-
-        const title = document.createElement('h3');
-        title.textContent = `Page ${pageNum}`;
-        title.className = 'divider';
-
-        const canvas = document.createElement('canvas');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        pageNode.appendChild(title);
-        pageNode.appendChild(canvas);
-
-        const canvasContext = canvas.getContext('2d');
-
-        // Render PDF page into canvas context, asynchronously
-        page.render({
-          canvasContext,
-          viewport
-        });
-
-        return pageNode;
-      }
-    </script>
+    <!-- Load the site source code. -->
+    <script src="pdf-viewer.js"></script>
   </body>
 </html>
