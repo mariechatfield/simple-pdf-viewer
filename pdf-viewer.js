@@ -353,7 +353,7 @@
       }
     });
 
-    loadPDF('Sample PDF', 'sample.pdf');
+    loadPDF('Sample PDF', 'sample-content/sample.pdf');
   }
 
   initialize();
